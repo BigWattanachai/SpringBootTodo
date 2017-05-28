@@ -3,20 +3,25 @@ package com.ascend.todo.controllers;
 
 import com.ascend.todo.entities.User;
 import com.ascend.todo.services.TodoService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Created by BiG on 5/27/2017 AD.
  */
 public class TodoControllerTest {
+
     @InjectMocks
     private TodoController todoController;
 
@@ -34,6 +40,7 @@ public class TodoControllerTest {
 
     private User user1;
     private User user2;
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Before
     public void setup() {
@@ -63,5 +70,21 @@ public class TodoControllerTest {
                 .andExpect(status().isOk());
 
         verify(todoService).getAllUser();
+    }
+
+    @Test
+    public void shouldReturnUserWhenCreateNewUserSuccessfully() throws Exception {
+        when(todoService.createUser(any(User.class))).thenReturn(user1);
+
+        mvc.perform(post("/api/v1/users")
+                .content(mapper.writeValueAsString(user1))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(jsonPath("$.first_name", is("user1FirstName")))
+                .andExpect(jsonPath("$.last_name", is("user1LastName")))
+                .andExpect(jsonPath("$.email", is("user1@gmail.com")))
+                .andExpect(status().isOk());
+
+        verify(todoService).createUser(any(User.class));
     }
 }
