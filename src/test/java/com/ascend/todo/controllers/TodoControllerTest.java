@@ -17,11 +17,13 @@ import java.util.Arrays;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -79,12 +81,52 @@ public class TodoControllerTest {
         mvc.perform(post("/api/v1/users")
                 .content(mapper.writeValueAsString(user1))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
                 .andExpect(jsonPath("$.first_name", is("user1FirstName")))
                 .andExpect(jsonPath("$.last_name", is("user1LastName")))
                 .andExpect(jsonPath("$.email", is("user1@gmail.com")))
                 .andExpect(status().isOk());
 
         verify(todoService).createUser(any(User.class));
+    }
+
+    @Test
+    public void shouldReturnUserWhenGetExistingUserById() throws Exception {
+        when(todoService.getUserById(anyLong())).thenReturn(user1);
+
+        mvc.perform(get("/api/v1/users/1"))
+                .andExpect(jsonPath("$.first_name", is("user1FirstName")))
+                .andExpect(jsonPath("$.last_name", is("user1LastName")))
+                .andExpect(jsonPath("$.email", is("user1@gmail.com")))
+                .andExpect(status().isOk());
+
+        verify(todoService).getUserById(anyLong());
+    }
+
+    @Test
+    public void shouldReturnUserWhenDeleteExistingUserInDb() throws Exception {
+        when(todoService.deleteUser(anyLong())).thenReturn(user1);
+
+        mvc.perform(delete("/api/v1/users/1"))
+                .andExpect(jsonPath("$.first_name", is("user1FirstName")))
+                .andExpect(jsonPath("$.last_name", is("user1LastName")))
+                .andExpect(jsonPath("$.email", is("user1@gmail.com")))
+                .andExpect(status().isOk());
+
+        verify(todoService).deleteUser(anyLong());
+    }
+
+    @Test
+    public void shouldReturnUserWhenUpdateExistingUserSuccessfully() throws Exception {
+        when(todoService.updateUser(anyLong(),any(User.class))).thenReturn(user1);
+
+        mvc.perform(put("/api/v1/users/1")
+                .content(mapper.writeValueAsString(user1))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.first_name", is("user1FirstName")))
+                .andExpect(jsonPath("$.last_name", is("user1LastName")))
+                .andExpect(jsonPath("$.email", is("user1@gmail.com")))
+                .andExpect(status().isOk());
+
+        verify(todoService).updateUser(anyLong(),any(User.class));
     }
 }

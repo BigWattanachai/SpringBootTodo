@@ -72,11 +72,14 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>${cobertura.version}</version>
 				<configuration>
+					<quiet>true</quiet>
 					<instrumentation>
 						<excludes>
 							<exclude>com/ascend/todo/SpringBootTodoApplication*</exclude>
 							<exclude>com/ascend/todo/entities/**</exclude>
 							<exclude>com/ascend/todo/repositories/**</exclude>
+							<exclude>com/ascend/todo/constants/**</exclude>
+							<exclude>com/ascend/todo/controllers/GlobalControllerExceptionHandler*</exclude>
 						</excludes>
 					</instrumentation>
 				</configuration>

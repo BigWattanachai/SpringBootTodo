@@ -1,9 +1,12 @@
 package com.ascend.todo.services;
 
 import com.ascend.todo.entities.User;
+import com.ascend.todo.exceptions.TodoNotFoundException;
 import com.ascend.todo.repositories.UserRepo;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -14,6 +17,10 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,11 +28,14 @@ import static org.mockito.Mockito.when;
  * Created by BiG on 5/27/2017 AD.
  */
 public class TodoServiceTest {
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
+
     @InjectMocks
-    TodoService todoService;
+    private TodoService todoService;
 
     @Mock
-    UserRepo userRepo;
+    private UserRepo userRepo;
 
     private User user1;
     private User user2;
@@ -57,7 +67,6 @@ public class TodoServiceTest {
         verify(userRepo).saveAndFlush(Matchers.any(User.class));
     }
 
-
     @Test
     public void shouldReturnAllUserWhenGetAllExistingUserInDb() throws Exception {
         when(userRepo.findAll()).thenReturn(Arrays.asList(user1, user2));
@@ -72,5 +81,69 @@ public class TodoServiceTest {
         assertThat(userList.get(1).getEmail(), is("user2@gmail.com"));
 
         verify(userRepo).findAll();
+    }
+
+    @Test
+    public void shouldReturnUserWhenGetExistingUserInDbWithId() throws Exception {
+        when(userRepo.findOne(anyLong())).thenReturn(user1);
+
+        User userResponse = todoService.getUserById(1L);
+        assertThat(userResponse.getFirstName(), is("user1FirstName"));
+        assertThat(userResponse.getLastName(), is("user1LastName"));
+        assertThat(userResponse.getEmail(), is("user1@gmail.com"));
+
+        verify(userRepo).findOne(anyLong());
+    }
+
+    @Test
+    public void shouldReturnUserWhenDeleteExistingUserInDbWithId() throws Exception {
+        when(userRepo.findOne(anyLong())).thenReturn(user1);
+        doNothing().when(userRepo).delete(Matchers.any(User.class));
+
+        User userResponse = todoService.deleteUser(1L);
+        assertThat(userResponse.getFirstName(), is("user1FirstName"));
+        assertThat(userResponse.getLastName(), is("user1LastName"));
+        assertThat(userResponse.getEmail(), is("user1@gmail.com"));
+
+        verify(userRepo).findOne(anyLong());
+        verify(userRepo).delete(Matchers.any(User.class));
+    }
+
+    @Test
+    public void shouldThrowTodoExceptionWhenDeleteNonExistUserInDb() throws Exception {
+        when(userRepo.findOne(anyLong())).thenReturn(null);
+
+        expectedEx.expect(TodoNotFoundException.class);
+        expectedEx.expectMessage("User id 1 is not found");
+        todoService.deleteUser(1L);
+
+        verify(userRepo).findOne(anyLong());
+        verify(userRepo, never()).delete(anyLong());
+    }
+
+    @Test
+    public void shouldReturnUserWhenUpdateExistingUserSuccessfully() throws Exception {
+        when(userRepo.findOne(anyLong())).thenReturn(user1);
+        when(userRepo.saveAndFlush(any(User.class))).thenReturn(user1);
+
+        User userResponse = todoService.updateUser(1L, user1);
+        assertThat(userResponse.getFirstName(), is("user1FirstName"));
+        assertThat(userResponse.getLastName(), is("user1LastName"));
+        assertThat(userResponse.getEmail(), is("user1@gmail.com"));
+
+        verify(userRepo).findOne(anyLong());
+        verify(userRepo).saveAndFlush(any(User.class));
+    }
+
+    @Test
+    public void shouldThrowTodoExceptionWhenUpdateNonExistUserInDb() throws Exception {
+        when(userRepo.findOne(anyLong())).thenReturn(null);
+
+        expectedEx.expect(TodoNotFoundException.class);
+        expectedEx.expectMessage("User id 1 is not found");
+        todoService.updateUser(1L, user1);
+
+        verify(userRepo).findOne(anyLong());
+        verify(userRepo, never()).saveAndFlush(any(User.class));
     }
 }
