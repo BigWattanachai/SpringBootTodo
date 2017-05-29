@@ -2,7 +2,7 @@ package com.ascend.todo.services;
 
 import com.ascend.todo.constants.ErrorMsgEnum;
 import com.ascend.todo.entities.User;
-import com.ascend.todo.exceptions.TodoNotFoundException;
+import com.ascend.todo.exceptions.UserNotFoundException;
 import com.ascend.todo.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class TodoService {
 
     public User deleteUser(Long id) {
         User user = Optional.ofNullable(userRepo.findOne(id))
-                .orElseThrow(() -> new TodoNotFoundException(String.format(ErrorMsgEnum.USER_NOT_FOUND.getMsg(), id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format(ErrorMsgEnum.USER_NOT_FOUND.getMsg(), id)));
         userRepo.delete(user);
         return user;
     }
@@ -43,7 +43,7 @@ public class TodoService {
 
     public User updateUser(long id, User userUpdate) {
         User user = Optional.ofNullable(userRepo.findOne(id))
-                .orElseThrow(() -> new TodoNotFoundException(String.format(ErrorMsgEnum.USER_NOT_FOUND.getMsg(), id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format(ErrorMsgEnum.USER_NOT_FOUND.getMsg(), id)));
         user.setFirstName(userUpdate.getFirstName());
         user.setLastName(userUpdate.getLastName());
         user.setEmail(userUpdate.getEmail());

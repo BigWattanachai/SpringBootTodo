@@ -1,6 +1,6 @@
 package com.ascend.todo.controllers;
 
-import com.ascend.todo.exceptions.TodoNotFoundException;
+import com.ascend.todo.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,7 +14,7 @@ import java.io.IOException;
 @ControllerAdvice
 public class GlobalControllerExceptionHandler {
     @ExceptionHandler
-    public void handleTodoException(TodoNotFoundException exception, HttpServletResponse response) throws IOException {
+    public void handleTodoException(UserNotFoundException exception, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.NOT_FOUND.value(), exception.getMessage());
     }
 }

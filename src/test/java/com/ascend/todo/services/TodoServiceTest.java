@@ -1,7 +1,7 @@
 package com.ascend.todo.services;
 
 import com.ascend.todo.entities.User;
-import com.ascend.todo.exceptions.TodoNotFoundException;
+import com.ascend.todo.exceptions.UserNotFoundException;
 import com.ascend.todo.repositories.UserRepo;
 import org.junit.Before;
 import org.junit.Rule;
@@ -110,10 +110,10 @@ public class TodoServiceTest {
     }
 
     @Test
-    public void shouldThrowTodoExceptionWhenDeleteNonExistUserInDb() throws Exception {
+    public void shouldThrowUserExceptionWhenDeleteNonExistUserInDb() throws Exception {
         when(userRepo.findOne(anyLong())).thenReturn(null);
 
-        expectedEx.expect(TodoNotFoundException.class);
+        expectedEx.expect(UserNotFoundException.class);
         expectedEx.expectMessage("User id 1 is not found");
         todoService.deleteUser(1L);
 
@@ -136,10 +136,10 @@ public class TodoServiceTest {
     }
 
     @Test
-    public void shouldThrowTodoExceptionWhenUpdateNonExistUserInDb() throws Exception {
+    public void shouldThrowUserExceptionWhenUpdateNonExistUserInDb() throws Exception {
         when(userRepo.findOne(anyLong())).thenReturn(null);
 
-        expectedEx.expect(TodoNotFoundException.class);
+        expectedEx.expect(UserNotFoundException.class);
         expectedEx.expectMessage("User id 1 is not found");
         todoService.updateUser(1L, user1);
 
